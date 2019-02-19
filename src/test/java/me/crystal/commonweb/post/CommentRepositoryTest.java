@@ -4,11 +4,17 @@ package me.crystal.commonweb.post;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static me.crystal.commonweb.post.CommentSpecs.isBest;
+import static me.crystal.commonweb.post.CommentSpecs.isGood;
+
 @RunWith(SpringRunner.class)
-@DataJpaTest
+@SpringBootTest
 public class CommentRepositoryTest {
 
     @Autowired
@@ -35,6 +41,24 @@ public class CommentRepositoryTest {
             System.out.println("===================");
             System.out.println(c.getComment());
         });
+
+    }
+
+    @Test
+    public void specs() {
+        comments.findAll(isBest().or(isGood()), PageRequest.of(0, 10));
+    }
+
+    @Test
+    public void qbe() {
+        Comment prove = new Comment();
+        prove.setBest(true);
+
+        ExampleMatcher exampleMatcher = ExampleMatcher.matchingAny()
+                .withIgnorePaths("up","down");
+        Example<Comment> example = Example.of(prove, exampleMatcher);
+
+        comments.findAll(example);
     }
 
 }
